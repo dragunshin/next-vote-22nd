@@ -36,10 +36,10 @@ export function LoginForm() {
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-gray-200">
+      <div className="flex">
         <button
           onClick={() => setUserType('login')}
-          className={`flex-1 py-3 text-base font-medium transition-colors relative ${
+          className={`flex-1 py-4 text-base font-medium transition-all relative ${
             userType === 'login' ? 'text-black' : 'text-gray-400'
           }`}
         >
@@ -50,7 +50,7 @@ export function LoginForm() {
         </button>
         <button
           onClick={() => setUserType('expert')}
-          className={`flex-1 py-3 text-base font-medium transition-colors relative ${
+          className={`flex-1 py-4 text-base font-medium transition-all relative ${
             userType === 'expert' ? 'text-black' : 'text-gray-400'
           }`}
         >
@@ -63,7 +63,7 @@ export function LoginForm() {
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6 px-6 pt-12">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 pt-10">
           {/* Email Input */}
           <input
             name="email"
@@ -71,7 +71,7 @@ export function LoginForm() {
             placeholder="이메일 입력"
             value={formData.email}
             onChange={handleChange}
-            className="w-full h-14 px-5 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-base bg-white transition-colors"
+            className="w-full h-14 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
             required
           />
 
@@ -82,14 +82,14 @@ export function LoginForm() {
             placeholder="패스워드 입력"
             value={formData.password}
             onChange={handleChange}
-            className="w-full h-14 px-5 border border-gray-200 rounded-2xl focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-base bg-white transition-colors"
+            className="w-full h-14 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
             required
           />
 
           {/* Login Button */}
           <button
             type="submit"
-            className="w-full h-14 flex items-center justify-center rounded-2xl font-semibold text-base bg-black text-white hover:bg-gray-800 transition-colors"
+            className="w-full h-14 flex items-center justify-center mt-2 font-semibold text-base bg-black text-white hover:bg-gray-800 transition-colors rounded"
           >
             로그인
           </button>
@@ -110,7 +110,7 @@ export function LoginForm() {
           </div>
 
           {/* Divider */}
-          <div className="flex items-center gap-4 my-8">
+          <div className="flex items-center gap-4 pt-[78px] pb-5">
             <div className="flex-1 border-t border-gray-200" />
             <span className="text-sm text-gray-500">SNS 계정으로 간편로그인</span>
             <div className="flex-1 border-t border-gray-200" />
@@ -120,14 +120,14 @@ export function LoginForm() {
           <div className="flex flex-col gap-3 pb-8">
             <button
               type="button"
-              className="w-full h-14 flex items-center justify-center gap-2 border border-gray-200 rounded-2xl bg-white hover:bg-gray-50 transition-colors"
+              className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded"
             >
               <img src={googleIcon} alt="Google" className="w-5 h-5" />
               <span className="text-base font-medium text-gray-900">Google 로그인</span>
             </button>
             <button
               type="button"
-              className="w-full h-14 flex items-center justify-center gap-2 rounded-2xl hover:opacity-90 transition-opacity"
+              className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded"
               style={{ backgroundColor: '#FEE500' }}
             >
               <img src={kakaoIcon} alt="Kakao" className="w-5 h-5" />
