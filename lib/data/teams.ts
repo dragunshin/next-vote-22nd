@@ -24,7 +24,7 @@ export const partsData: PartData[] = [
     teams: [
       {
         id: 'fe-team-1',
-        name: 'Digglndie',
+        name: 'DiggIndie',
         members: [
           { id: 'fe1-member-1', name: '백승선' },
           { id: 'fe1-member-2', name: '조성아' },
