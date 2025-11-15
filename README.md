@@ -1,92 +1,36 @@
-# next-vote-22nd
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## **서론**
+## Getting Started
 
-안녕하세요! 프론트엔드 운영진 권동욱입니다. 🍀  
-벌써 마지막 과제에 도달했네요. 이번 스터디는 특별히 **백엔드 팀원들과 함께하는 협업 과제**로 준비했습니다.
+First, run the development server:
 
-현대 웹 개발에서는 REST API가 데이터 통신의 핵심으로 자리 잡으면서, 프론트엔드와 백엔드 간의 협업이 더욱 중요해졌습니다. 백엔드는 API를 통해 데이터를 제공하고, 프론트엔드는 이를 기반으로 사용자 경험을 책임집니다. 따라서 API를 잘 활용하고 백엔드 개발자와 원활히 소통하는 능력은 필수적인 스킬입니다.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-이번 과제는 앞으로 팀 프로젝트에서 **실제로 백엔드와 협업하기 전 연습을 해보는 기회**입니다. Next.js를 활용해 **투표 기능**을 가진 애플리케이션을 제작하면서 백엔드와의 소통, 역할 분담, 데이터 흐름을 다루는 경험을 쌓아 보세요. 이 경험은 추후 팀 프로젝트에서 더욱 원활한 협력을 가능하게 할 것입니다.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-여러분의 멋진 결과물을 기대하며 마지막 과제를 응원합니다. 화이팅! 🔥
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
----
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## **과제**
+## Learn More
 
-### **목표**
+To learn more about Next.js, take a look at the following resources:
 
-- REST API를 활용하여 서버와의 통신 방식을 이해합니다.
-- JavaScript의 비동기 처리 방식(`async/await`, Promise)을 익힙니다.
-- API 문서를 바탕으로 백엔드와 소통하는 방법을 학습합니다.
-- 팀 내 협업을 통해 효율적인 역할 분담을 고민하고 적용합니다.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
 
----
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-### **기한**
+## Deploy on Vercel
 
-- **2025년 11월 15일 토요일**까지 1차 필수 구현 사항이 적용된 중간 결과물을 제출해주세요. 
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
----
-
-### **1차 필수 구현 사항**
-
-1. **프로젝트 세팅**
-   - Next.js의 특성을 고려하여 효과적인 폴더 구조를 고민해 봅니다.
-   - API 통신, 스타일링, 전역 상태 관리 및 기타 라이브러리 등을 팀원과 상의하여 세팅합니다.
-   - **Github organization을 사용합니다.**
-
-2. **퍼블리싱**
-   - 프로젝트에 필요한 모든 화면을 퍼블리싱합니다.
-   - 다양한 디바이스에서 최적의 사용자 경험을 제공하기 위해 반응형 디자인을 적용합니다.
-
-3. **로그인 기능** 
-   - 사용자는 아이디와 비밀번호를 입력하여 로그인할 수 있습니다.
-   - 로그인 시 JWT를 통해 인증을 처리합니다.
-   - 아이디 또는 비밀번호가 틀렸을 경우, 에러 메시지를 표시합니다.
-   - 로그아웃 기능을 구현합니다.
-   - **백에서 서버 배포가 안 되었을 경우**에는 다음 주로 넘겨도 괜찮습니다.
-
-### **2차 필수 구현 사항**
-
-1. **투표 기능**
-   - 로그인한 사용자는 투표에 참여할 수 있습니다.
-   - 각 후보에 대한 투표 수를 실시간으로 확인할 수 있습니다.
-   - 사용자는 한 번만 투표할 수 있으며, 중복 투표를 방지합니다.
-
-2. **후보 목록 조회**
-   - 모든 사용자는 후보자의 목록과 상세 정보를 확인할 수 있습니다.
-   - 후보자의 이름, 사진, 소개 등을 표시합니다.
-
-3. **투표 결과 조회**
-   - 투표 종료 후, 모든 사용자는 최종 투표 결과를 확인할 수 있습니다.
-   - 각 후보자의 득표 수와 득표율을 시각적으로 표현합니다.
-
-4. **에러 처리**
-   - 서버 오류, 네트워크 문제 등 다양한 에러 상황에 대한 처리를 구현합니다.
-   - 사용자에게 이해하기 쉬운 에러 메시지를 제공합니다.
-
----
-
-### **디자인 참고**
-
-다음의 리소스를 참고해 UI/UX를 개선해보세요:
-- [디자인 레퍼런스1](https://www.figma.com/design/7xoPYTjMHcwPk2yl92Eynx/%ED%98%91%EB%8F%99%EA%B3%BC%EC%A0%9C-%EB%A0%88%ED%8D%BC%EB%9F%B0%EC%8A%A4?node-id=0-1&node-type=canvas)
-- [디자인 레퍼런스2](https://www.figma.com/design/XpKkyWcguIFY9QzWWJHOyL/%ED%98%91%EB%8F%99%EA%B3%BC%EC%A0%9C-%EB%A0%88%ED%8D%BC%EB%9F%B0%EC%8A%A4?node-id=0-1)
-- [디자인 레퍼런스3](https://www.figma.com/design/12WK4MEhjwNmt89HkRu8Gp/%EB%B0%94%EB%A6%AC%EB%B0%94%EB%A6%AC-%ED%88%AC%ED%91%9C)
-- [디자인 레퍼런스4](https://www.figma.com/design/qsTGeBRrKWiWE04eVOTFQ9/CEOS-CupfeeDeal-Vote?node-id=38-503&p=f&t=sM5p1Gw4hA5G5H5D-0)
-
-20기 과제
-- [CupfeeDeal](https://github.com/CEOS-Developers/next-vote-20th/pull/6)
-- [케이크WAY](https://github.com/CEOS-Developers/next-vote-20th/pull/5)
-- [페달지니](https://github.com/CEOS-Developers/next-vote-20th/pull/2)
-
-21기 과제
-- [프로메사](https://github.com/CEOS-Developers/next-vote-21th/pull/3)
-- [하니홈](https://github.com/CEOS-Developers/next-vote-21th/pull/5)
-
-### **선택 사항**
-
-- API 요청 방식은 자유롭게 선택 가능 (예: Fetch API, axios 등).
-- 최신 자바스크립트 스타일에 익숙해지기 위해 `Promise.then()` 대신 `async/await`를 사용해 보세요.
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
