@@ -7,12 +7,16 @@ import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import type { ApiErrorResponse } from '@/lib/api/types';
 import { AxiosError } from 'axios';
+import { partsData, type Part } from '@/lib/data/teams';
 
 type UserType = 'customer' | 'expert';
 
 export function SignUpForm() {
   const router = useRouter();
   const [userType, setUserType] = useState<UserType>('customer');
+  const [selectedPart, setSelectedPart] = useState<Part | null>(null);
+  const [selectedTeamId, setSelectedTeamId] = useState<string>('');
+  const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [formData, setFormData] = useState({
     nickname: '',
     birthDate: '',
@@ -23,6 +27,9 @@ export function SignUpForm() {
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
+
+  const selectedPartData = partsData.find((p) => p.id === selectedPart);
+  const selectedTeam = selectedPartData?.teams.find((t) => t.id === selectedTeamId);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -122,6 +129,9 @@ export function SignUpForm() {
     formData.email &&
     formData.password &&
     formData.passwordConfirm &&
+    selectedPart &&
+    selectedTeamId &&
+    selectedMemberId &&
     agreed;
 
   return (
@@ -137,24 +147,32 @@ export function SignUpForm() {
       {/* Tabs */}
       <div className="flex">
         <button
-          onClick={() => setUserType('customer')}
+          onClick={() => {
+            setSelectedPart('frontend');
+            setSelectedTeamId('');
+            setSelectedMemberId('');
+          }}
           className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'customer' ? 'text-black' : 'text-gray-400'
+            selectedPart === 'frontend' ? 'text-black' : 'text-gray-400'
           }`}
         >
-          그루머
-          {userType === 'customer' && (
+          Front-End
+          {selectedPart === 'frontend' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
           )}
         </button>
         <button
-          onClick={() => setUserType('expert')}
+          onClick={() => {
+            setSelectedPart('backend');
+            setSelectedTeamId('');
+            setSelectedMemberId('');
+          }}
           className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'expert' ? 'text-black' : 'text-gray-400'
+            selectedPart === 'backend' ? 'text-black' : 'text-gray-400'
           }`}
         >
-          전문가
-          {userType === 'expert' && (
+          Back-End
+          {selectedPart === 'backend' && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
           )}
         </button>
@@ -163,6 +181,59 @@ export function SignUpForm() {
       {/* Form - 스크롤 가능 영역 */}
       <div className="flex-1 overflow-y-auto">
         <form onSubmit={handleSubmit} className="px-6 pt-7 flex flex-col gap-6">
+          {/* 팀명 선택 */}
+          <div>
+            <label className="block text-base font-medium text-black mb-3">팀명 *</label>
+            <div className="relative">
+              <select
+                value={selectedTeamId}
+                onChange={(e) => {
+                  setSelectedTeamId(e.target.value);
+                  setSelectedMemberId('');
+                }}
+                disabled={!selectedPart}
+                className="w-full h-12 px-4 border border-gray-200 rounded appearance-none text-[12px] disabled:bg-gray-50 disabled:text-gray-400"
+              >
+                <option value="">팀을 선택해주세요</option>
+                {selectedPartData?.teams.map((team) => (
+                  <option key={team.id} value={team.id}>
+                    {team.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* 이름 선택 */}
+          <div>
+            <label className="block text-base font-medium text-black mb-3">이름 *</label>
+            <div className="relative">
+              <select
+                value={selectedMemberId}
+                onChange={(e) => setSelectedMemberId(e.target.value)}
+                disabled={!selectedTeamId}
+                className="w-full h-12 px-4 border border-gray-200 rounded appearance-none text-[12px] disabled:bg-gray-50 disabled:text-gray-400"
+              >
+                <option value="">이름을 선택해주세요</option>
+                {selectedTeam?.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    {member.name}
+                  </option>
+                ))}
+              </select>
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                <svg width="12" height="8" viewBox="0 0 12 8" fill="none">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
           {/* 닉네임 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">닉네임</label>

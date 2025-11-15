@@ -1,33 +1,96 @@
+'use client';
+
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+type VoteCategory = 'frontend' | 'backend' | 'demo';
+
+const voteCategories = [
+  { id: 'frontend' as VoteCategory, label: '프론트엔드 파트장 투표' },
+  { id: 'backend' as VoteCategory, label: '백엔드 파트장 투표' },
+  { id: 'demo' as VoteCategory, label: '데모데이 투표' },
+];
+
 export default function Home() {
+  const router = useRouter();
+  const [showMenu, setShowMenu] = useState(false);
+  const [totalVotes] = useState(0);
+
+  // 실제 로그인 상태 체크
+  const [isLoggedIn] = useState(false);
+
+  const handleVoteClick = () => {
+    if (!isLoggedIn) {
+      router.push('/auth/login');
+    } else {
+      console.log('투표 페이지로 이동');
+    }
+  };
+
   return (
-    <div className="">
-      <Link href="/auth/login">
-        <button className="px-6 py-3 bg-black text-white">
-          로그인 페이지
+    <div className="min-h-screen bg-white flex flex-col">
+      <header className="relative px-6 py-4 flex justify-end">
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="text-2xl"
+        >
+          ☰
         </button>
-      </Link>
-      <Link href="/auth/signup">
-        <button className="px-6 py-3 bg-gray-800 text-white">
-          회원가입 페이지
-        </button>
-      </Link>
-      <Link href="/auth/social-signup">
-        <button className="px-6 py-3 bg-gray-600 text-white">
-          소셜 회원가입 페이지
-        </button>
-      </Link>
-      <Link href="/auth/interest-selection">
-        <button className="px-6 py-3 bg-gray-400 text-white">
-          관심 분야 선택 페이지
-        </button>
-      </Link>
-      <Link href="/auth/terms-agreement">
-        <button className="px-6 py-3 bg-gray-300 text-white">
-          약관 동의 페이지
-        </button>
-      </Link>
+
+        {showMenu && (
+          <div className="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10">
+            <Link
+              href="/auth/login"
+              className="block px-6 py-3 hover:bg-gray-50 text-base"
+              onClick={() => setShowMenu(false)}
+            >
+              로그인
+            </Link>
+            <Link
+              href="/auth/signup"
+              className="block px-6 py-3 hover:bg-gray-50 text-base border-t border-gray-200"
+              onClick={() => setShowMenu(false)}
+            >
+              회원가입
+            </Link>
+          </div>
+        )}
+      </header>
+
+      <div className="flex-1 px-6 pt-12 flex flex-col">
+        <div className="mb-16">
+          <h1 className="text-[28px] font-bold mb-2">
+            🏆 <span className="text-[#7C3AED]">2025</span> CEOS
+          </h1>
+          <h2 className="text-[28px] font-bold">22ND AWARDS</h2>
+        </div>
+
+        <div className="mb-16">
+          <div className="space-y-3">
+            {voteCategories.map((category) => (
+              <div
+                key={category.id}
+                className="text-lg font-medium text-gray-800"
+              >
+                # {category.label}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-auto pb-8 text-center">
+          <button
+            onClick={handleVoteClick}
+            className="w-full max-w-[200px] mx-auto block px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
+          >
+            투표하러 가기
+          </button>
+          <p className="mt-4 text-sm text-[#7C3AED]">
+            현재 총 <span className="font-bold">{totalVotes}건</span>의 투표가 진행되었어요!
+          </p>
+        </div>
+      </div>
     </div>
   );
 }
