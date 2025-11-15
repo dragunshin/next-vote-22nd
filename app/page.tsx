@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 
-type VoteCategory = 'frontend' | 'backend' | 'demo';
+type VoteCategory = "frontend" | "backend" | "demo";
 
 const voteCategories = [
-  { id: 'frontend' as VoteCategory, label: '프론트엔드 파트장 투표' },
-  { id: 'backend' as VoteCategory, label: '백엔드 파트장 투표' },
-  { id: 'demo' as VoteCategory, label: '데모데이 투표' },
+  { id: "frontend" as VoteCategory, label: "프론트엔드 파트장 투표" },
+  { id: "backend" as VoteCategory, label: "백엔드 파트장 투표" },
+  { id: "demo" as VoteCategory, label: "데모데이 투표" },
 ];
 
 export default function Home() {
@@ -22,19 +22,24 @@ export default function Home() {
 
   const handleVoteClick = () => {
     if (!isLoggedIn) {
-      router.push('/auth/login');
+      router.push("/auth/login");
     } else {
-      console.log('투표 페이지로 이동');
+      console.log("투표 페이지로 이동");
+    }
+  };
+
+  const handleVoteClick2 = () => {
+    if (!isLoggedIn) {
+      router.push("/vote");
+    } else {
+      console.log("투표 페이지로 이동");
     }
   };
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <header className="relative px-6 py-4 flex justify-end">
-        <button
-          onClick={() => setShowMenu(!showMenu)}
-          className="text-2xl"
-        >
+        <button onClick={() => setShowMenu(!showMenu)} className="text-2xl">
           ☰
         </button>
 
@@ -87,8 +92,16 @@ export default function Home() {
             투표하러 가기
           </button>
           <p className="mt-4 text-sm text-[#7C3AED]">
-            현재 총 <span className="font-bold">{totalVotes}건</span>의 투표가 진행되었어요!
+            현재 총 <span className="font-bold">{totalVotes}건</span>의 투표가
+            진행되었어요!
           </p>
+
+          <button
+            onClick={handleVoteClick2}
+            className="w-full max-w-[200px] mx-auto block px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
+          >
+            투표하러 가기(프론트)
+          </button>
         </div>
       </div>
     </div>

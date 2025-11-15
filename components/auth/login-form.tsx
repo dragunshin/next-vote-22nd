@@ -1,35 +1,35 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import Link from 'next/link';
-import { authService } from '@/services/auth.service';
-import type { ApiErrorResponse } from '@/lib/api/types';
-import { AxiosError } from 'axios';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Link from "next/link";
+import { authService } from "@/services/auth.service";
+import type { ApiErrorResponse } from "@/lib/api/types";
+import { AxiosError } from "axios";
 
-type UserType = 'login' | 'expert';
+type UserType = "login" | "expert";
 
 export function LoginForm() {
   const router = useRouter();
-  const [userType, setUserType] = useState<UserType>('login');
+  const [userType, setUserType] = useState<UserType>("login");
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   });
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     // 입력 시 에러 메시지 초기화
-    if (error) setError('');
+    if (error) setError("");
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
 
     try {
@@ -40,9 +40,9 @@ export function LoginForm() {
 
       // 로그인 성공
       if (response.statusCode === 0) {
-        console.log('로그인 성공:', response.data);
+        console.log("로그인 성공:", response.data);
         // 홈 페이지로 이동
-        router.push('/');
+        router.push("/");
       }
     } catch (err) {
       // 에러 처리
@@ -53,16 +53,16 @@ export function LoginForm() {
         // API 명세서 에러 코드 처리
         switch (statusCode) {
           case 1101:
-            setError('이메일이 일치하지 않습니다.');
+            setError("이메일이 일치하지 않습니다.");
             break;
           case 1102:
-            setError('비밀번호가 일치하지 않습니다.');
+            setError("비밀번호가 일치하지 않습니다.");
             break;
           default:
-            setError(message || '로그인에 실패했습니다. 다시 시도해주세요.');
+            setError(message || "로그인에 실패했습니다. 다시 시도해주세요.");
         }
       } else {
-        setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
       }
     } finally {
       setIsLoading(false);
@@ -74,21 +74,26 @@ export function LoginForm() {
       {/* Header */}
       <header className="flex items-center px-6 py-4">
         <button onClick={() => router.back()} className="mr-3">
-          <Image src="/images/login/back.svg" alt="back" width={10} height={18} />
+          <Image
+            src="/images/login/back.svg"
+            alt="back"
+            width={10}
+            height={18}
+          />
         </button>
-        <h1 className="text-xl font-semibold">회원가입/로그인</h1>
+        <h1 className="text-xl font-semibold">로그인</h1>
       </header>
 
       {/* Tabs */}
-      <div className="flex">
+      {/* <div className="flex">
         <button
-          onClick={() => setUserType('login')}
+          onClick={() => setUserType("login")}
           className={`flex-1 py-4 text-base font-medium transition-all relative ${
-            userType === 'login' ? 'text-black' : 'text-gray-400'
+            userType === "login" ? "text-black" : "text-gray-400"
           }`}
         >
           로그인
-          {userType === 'login' && (
+          {userType === "login" && (
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
           )}
         </button>
@@ -103,11 +108,14 @@ export function LoginForm() {
             <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-black" />
           )}
         </button>
-      </div>
+      </div> */}
 
       {/* Form */}
       <div className="flex-1 overflow-y-auto">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 px-6 pt-10">
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col gap-4 px-6 pt-10"
+        >
           {/* Email Input */}
           <input
             name="email"
@@ -133,11 +141,7 @@ export function LoginForm() {
           />
 
           {/* Error Message */}
-          {error && (
-            <div className="text-red-500 text-sm px-1">
-              {error}
-            </div>
-          )}
+          {error && <div className="text-red-500 text-sm px-1">{error}</div>}
 
           {/* Login Button */}
           <button
@@ -145,15 +149,23 @@ export function LoginForm() {
             disabled={isLoading}
             className="w-full h-14 flex items-center justify-center mt-2 font-semibold text-base bg-black text-white hover:bg-gray-800 transition-colors rounded disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? '로그인 중...' : '로그인'}
+            {isLoading ? "로그인 중..." : "로그인"}
           </button>
 
           {/* Password Reset / Sign Up Links */}
           <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <button type="button" className="hover:text-black transition-colors">
+            <button
+              type="button"
+              className="hover:text-black transition-colors"
+            >
               비밀번호 찾기
             </button>
-            <Image src="/images/login/seperate.svg" alt="separator" width={1} height={12} />
+            <Image
+              src="/images/login/seperate.svg"
+              alt="separator"
+              width={1}
+              height={12}
+            />
             <Link
               href="/auth/signup"
               className="hover:text-black transition-colors"
@@ -165,7 +177,9 @@ export function LoginForm() {
           {/* Divider */}
           <div className="flex items-center gap-4 pt-[78px] pb-5">
             <div className="flex-1 border-t border-gray-200" />
-            <span className="text-sm text-gray-500">SNS 계정으로 간편로그인</span>
+            <span className="text-sm text-gray-500">
+              SNS 계정으로 간편로그인
+            </span>
             <div className="flex-1 border-t border-gray-200" />
           </div>
 
@@ -175,16 +189,33 @@ export function LoginForm() {
               type="button"
               className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded"
             >
-              <Image src="/images/login/google.svg" alt="Google" width={20} height={20} />
-              <span className="text-base font-medium text-gray-900">Google 로그인</span>
+              <Image
+                src="/images/login/google.svg"
+                alt="Google"
+                width={20}
+                height={20}
+              />
+              <span className="text-base font-medium text-gray-900">
+                Google 로그인
+              </span>
             </button>
             <button
               type="button"
               className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded"
-              style={{ backgroundColor: '#FEE500' }}
+              style={{ backgroundColor: "#FEE500" }}
             >
-              <Image src="/images/login/kakao.svg" alt="Kakao" width={20} height={20} />
-              <span className="text-base font-semibold" style={{ color: '#3C1E1E' }}>카카오톡 로그인</span>
+              <Image
+                src="/images/login/kakao.svg"
+                alt="Kakao"
+                width={20}
+                height={20}
+              />
+              <span
+                className="text-base font-semibold"
+                style={{ color: "#3C1E1E" }}
+              >
+                카카오톡 로그인
+              </span>
             </button>
           </div>
         </form>
