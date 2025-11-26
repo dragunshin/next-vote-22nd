@@ -8,6 +8,34 @@ import { authService } from '@/services/auth.service';
 import type { ApiErrorResponse } from '@/lib/api/types';
 import { AxiosError } from 'axios';
 import { partsData, type Part } from '@/lib/data/teams';
+import { z } from 'zod';
+
+// Zod 스키마 정의
+const signupSchema = z.object({
+  nickname: z.string().min(1, '닉네임을 입력해주세요.'),
+  birthDate: z.string()
+    .regex(/^\d{8}$/, '생년월일은 8자리 숫자로 입력해주세요. (예: 19980101)'),
+  email: z.string().email('올바른 이메일 형식을 입력해주세요.'),
+  password: z.string()
+    .min(8, '비밀번호는 8자리 이상이어야 합니다.')
+    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, '비밀번호는 영문과 숫자를 포함해야 합니다.'),
+  passwordConfirm: z.string(),
+}).refine((data) => data.password === data.passwordConfirm, {
+  message: '비밀번호가 일치하지 않습니다.',
+  path: ['passwordConfirm'],
+});
+
+// 에러 메시지 매핑
+const ERROR_MESSAGES: Record<number, string> = {
+  1001: '닉네임 형식이 올바르지 않습니다.',
+  1002: '이미 사용 중인 닉네임입니다.',
+  1003: '비밀번호 형식이 올바르지 않습니다.',
+  1004: '생년월일 형식이 올바르지 않습니다.',
+  1005: '이메일 형식이 올바르지 않습니다.',
+  1006: '이미 가입된 이메일입니다.',
+  1007: '필수 약관 및 개인정보 처리에 동의해야 합니다.',
+  1008: '비밀번호가 일치하지 않습니다.',
+};
 
 type UserType = 'customer' | 'expert';
 
@@ -50,13 +78,23 @@ export function SignUpForm() {
     e.preventDefault();
     setError('');
 
+    // 약관 동의 확인
     if (!agreed) {
       setError('필수 약관 및 개인정보 처리에 동의해야 합니다.');
       return;
     }
 
-    if (formData.password !== formData.passwordConfirm) {
-      setError('비밀번호가 일치하지 않습니다.');
+    // 팀/멤버 선택 확인
+    if (!selectedPart || !selectedTeamId || !selectedMemberId) {
+      setError('파트, 팀, 이름을 모두 선택해주세요.');
+      return;
+    }
+
+    // Zod 클라이언트 검증
+    const validationResult = signupSchema.safeParse(formData);
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0];
+      setError(firstError.message);
       return;
     }
 
@@ -84,37 +122,10 @@ export function SignUpForm() {
       // 에러 처리
       const axiosError = err as AxiosError<ApiErrorResponse>;
       if (axiosError.response) {
-        const { statusCode, message } = axiosError.response.data;
+        const { statusCode } = axiosError.response.data;
 
-        // API 명세서 에러 코드 처리
-        switch (statusCode) {
-          case 1001:
-            setError('닉네임 형식이 올바르지 않습니다.');
-            break;
-          case 1002:
-            setError('이미 사용 중인 닉네임입니다.');
-            break;
-          case 1003:
-            setError('비밀번호 형식이 올바르지 않습니다.');
-            break;
-          case 1004:
-            setError('생년월일 형식이 올바르지 않습니다.');
-            break;
-          case 1005:
-            setError('이메일 형식이 올바르지 않습니다.');
-            break;
-          case 1006:
-            setError('이미 가입된 이메일입니다.');
-            break;
-          case 1007:
-            setError('필수 약관 및 개인정보 처리에 동의해야 합니다.');
-            break;
-          case 1008:
-            setError('비밀번호가 일치하지 않습니다.');
-            break;
-          default:
-            setError(message || '회원가입에 실패했습니다. 다시 시도해주세요.');
-        }
+        // statusCode를 기반으로 에러 메시지 매핑
+        setError(ERROR_MESSAGES[statusCode] || '회원가입에 실패했습니다. 다시 시도해주세요.');
       } else {
         setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
       }

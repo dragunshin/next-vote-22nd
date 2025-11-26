@@ -7,6 +7,22 @@ import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import type { ApiErrorResponse } from '@/lib/api/types';
 import { AxiosError } from 'axios';
+import { z } from 'zod';
+
+// Zod 스키마 정의
+const socialSignupSchema = z.object({
+  nickname: z.string().min(1, '닉네임을 입력해주세요.'),
+  birthDate: z.string()
+    .regex(/^\d{8}$/, '생년월일은 8자리 숫자로 입력해주세요. (예: 19980101)'),
+  email: z.string().email('올바른 이메일 형식을 입력해주세요.'),
+});
+
+// 에러 메시지 매핑 (소셜 회원가입은 별도 에러코드가 없어 공통 에러만 처리)
+const ERROR_MESSAGES: Record<number, string> = {
+  1005: '이메일 형식이 올바르지 않습니다.',
+  1006: '이미 가입된 이메일입니다.',
+  1007: '필수 약관 및 개인정보 처리에 동의해야 합니다.',
+};
 
 type UserType = 'customer' | 'expert';
 
@@ -41,8 +57,17 @@ export function SocialSignUpForm() {
     e.preventDefault();
     setError('');
 
+    // 약관 동의 확인
     if (!agreed) {
       setError('필수 약관 및 개인정보 처리에 동의해야 합니다.');
+      return;
+    }
+
+    // Zod 클라이언트 검증
+    const validationResult = socialSignupSchema.safeParse(formData);
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0];
+      setError(firstError.message);
       return;
     }
 
@@ -68,8 +93,10 @@ export function SocialSignUpForm() {
       // 에러 처리
       const axiosError = err as AxiosError<ApiErrorResponse>;
       if (axiosError.response) {
-        const { message } = axiosError.response.data;
-        setError(message || '회원가입에 실패했습니다. 다시 시도해주세요.');
+        const { statusCode } = axiosError.response.data;
+
+        // statusCode를 기반으로 에러 메시지 매핑
+        setError(ERROR_MESSAGES[statusCode] || '회원가입에 실패했습니다. 다시 시도해주세요.');
       } else {
         setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
       }

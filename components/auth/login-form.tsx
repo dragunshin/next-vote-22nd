@@ -7,6 +7,19 @@ import Link from "next/link";
 import { authService } from "@/services/auth.service";
 import type { ApiErrorResponse } from "@/lib/api/types";
 import { AxiosError } from "axios";
+import { z } from "zod";
+
+// Zod 스키마 정의
+const loginSchema = z.object({
+  email: z.string().email("올바른 이메일 형식을 입력해주세요."),
+  password: z.string().min(1, "비밀번호를 입력해주세요."),
+});
+
+// 에러 메시지 매핑
+const ERROR_MESSAGES: Record<number, string> = {
+  1101: "이메일이 일치하지 않습니다.",
+  1102: "비밀번호가 일치하지 않습니다.",
+};
 
 type UserType = "login" | "expert";
 
@@ -30,6 +43,15 @@ export function LoginForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    // Zod 클라이언트 검증
+    const validationResult = loginSchema.safeParse(formData);
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0];
+      setError(firstError.message);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -48,19 +70,10 @@ export function LoginForm() {
       // 에러 처리
       const axiosError = err as AxiosError<ApiErrorResponse>;
       if (axiosError.response) {
-        const { statusCode, message } = axiosError.response.data;
+        const { statusCode } = axiosError.response.data;
 
-        // API 명세서 에러 코드 처리
-        switch (statusCode) {
-          case 1101:
-            setError("이메일이 일치하지 않습니다.");
-            break;
-          case 1102:
-            setError("비밀번호가 일치하지 않습니다.");
-            break;
-          default:
-            setError(message || "로그인에 실패했습니다. 다시 시도해주세요.");
-        }
+        // statusCode를 기반으로 에러 메시지 매핑
+        setError(ERROR_MESSAGES[statusCode] || "로그인에 실패했습니다. 다시 시도해주세요.");
       } else {
         setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
       }
