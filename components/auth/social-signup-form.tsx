@@ -13,8 +13,11 @@ import { z } from 'zod';
 const socialSignupSchema = z.object({
   nickname: z.string().min(1, '닉네임을 입력해주세요.'),
   birthDate: z.string()
+    .min(1, '생년월일을 입력해주세요.')
     .regex(/^\d{8}$/, '생년월일은 8자리 숫자로 입력해주세요. (예: 19980101)'),
-  email: z.string().email('올바른 이메일 형식을 입력해주세요.'),
+  email: z.string()
+    .min(1, '이메일을 입력해주세요.')
+    .email('올바른 이메일 형식을 입력해주세요.'),
 });
 
 // 에러 메시지 매핑 (소셜 회원가입은 별도 에러코드가 없어 공통 에러만 처리)
@@ -35,14 +38,16 @@ export function SocialSignUpForm() {
     email: '',
   });
   const [agreed, setAgreed] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // 입력 시 에러 메시지 초기화
-    if (error) setError('');
+    // 입력 시 해당 필드의 에러 메시지 초기화
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: '' }));
+    }
   };
 
   const formatBirthDate = (date: string): string => {
@@ -55,19 +60,27 @@ export function SocialSignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
 
     // 약관 동의 확인
     if (!agreed) {
-      setError('필수 약관 및 개인정보 처리에 동의해야 합니다.');
+      setErrors({ general: '필수 약관 및 개인정보 처리에 동의해야 합니다.' });
       return;
     }
 
     // Zod 클라이언트 검증
     const validationResult = socialSignupSchema.safeParse(formData);
+
     if (!validationResult.success) {
-      const firstError = validationResult.error.issues[0];
-      setError(firstError.message);
+      // 각 필드별 에러를 객체로 변환
+      const fieldErrors: Record<string, string> = {};
+      validationResult.error.issues.forEach((issue) => {
+        const fieldName = issue.path[0] as string;
+        if (!fieldErrors[fieldName]) {
+          fieldErrors[fieldName] = issue.message;
+        }
+      });
+      setErrors(fieldErrors);
       return;
     }
 
@@ -96,9 +109,10 @@ export function SocialSignUpForm() {
         const { statusCode } = axiosError.response.data;
 
         // statusCode를 기반으로 에러 메시지 매핑
-        setError(ERROR_MESSAGES[statusCode] || '회원가입에 실패했습니다. 다시 시도해주세요.');
+        const errorMessage = ERROR_MESSAGES[statusCode] || '회원가입에 실패했습니다. 다시 시도해주세요.';
+        setErrors({ general: errorMessage });
       } else {
-        setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        setErrors({ general: '네트워크 오류가 발생했습니다. 다시 시도해주세요.' });
       }
     } finally {
       setIsLoading(false);
@@ -158,8 +172,13 @@ export function SocialSignUpForm() {
               placeholder="이름을 입력해주세요."
               value={formData.nickname}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.nickname ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.nickname && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.nickname}</p>
+            )}
           </div>
 
           {/* 생년월일 */}
@@ -170,8 +189,13 @@ export function SocialSignUpForm() {
               placeholder="ex) 19980101"
               value={formData.birthDate}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.birthDate && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.birthDate}</p>
+            )}
           </div>
 
           {/* 이메일 */}
@@ -179,19 +203,24 @@ export function SocialSignUpForm() {
             <label className="block text-base font-medium text-black mb-3">이메일</label>
             <input
               name="email"
-              type="email"
+              type="text"
               placeholder="example@gmail.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
               disabled={isLoading}
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+            )}
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="text-red-500 text-sm px-1">
-              {error}
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="text-red-500 text-sm px-3 py-2 bg-red-50 rounded border border-red-200">
+              {errors.general}
             </div>
           )}
         </form>

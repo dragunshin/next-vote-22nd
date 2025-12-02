@@ -5,77 +5,87 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { authService } from "@/services/auth.service";
-import type { ApiErrorResponse } from "@/lib/api/types";
-import { AxiosError } from "axios";
-import { z } from "zod";
+import { getErrorMessage } from "@/lib/api/error-handler";
+import { loginSchema } from "@/lib/schemas/auth.schema";
+import { useAuthStore } from "@/stores/useAuthStore";
 
-// Zod 스키마 정의
-const loginSchema = z.object({
-  email: z.string().email("올바른 이메일 형식을 입력해주세요."),
-  password: z.string().min(1, "비밀번호를 입력해주세요."),
-});
-
-// 에러 메시지 매핑
-const ERROR_MESSAGES: Record<number, string> = {
-  1101: "이메일이 일치하지 않습니다.",
-  1102: "비밀번호가 일치하지 않습니다.",
-};
-
-type UserType = "login" | "expert";
+// type UserType = "login" | "expert";
 
 export function LoginForm() {
   const router = useRouter();
-  const [userType, setUserType] = useState<UserType>("login");
+  const login = useAuthStore((state) => state.login);
+  // const [userType, setUserType] = useState<UserType>("login");
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
-  const [error, setError] = useState<string>("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // 입력 시 에러 메시지 초기화
-    if (error) setError("");
+    // 입력 시 해당 필드의 에러 메시지 초기화
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    // 일반 에러도 초기화
+    if (errors.general) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
-    // Zod 클라이언트 검증
-    const validationResult = loginSchema.safeParse(formData);
-    if (!validationResult.success) {
-      const firstError = validationResult.error.issues[0];
-      setError(firstError.message);
-      return;
-    }
-
+    setErrors({});
     setIsLoading(true);
 
     try {
-      const response = await authService.login({
+      // 1차 검증: Zod 스키마로 클라이언트 측 검증
+      const validatedData = loginSchema.parse({
         email: formData.email,
         password: formData.password,
       });
 
+      // 검증 통과 후 API 호출
+      const response = await authService.login(validatedData);
+
       // 로그인 성공
       if (response.statusCode === 0) {
-        console.log("로그인 성공:", response.data);
+        const { nickname, userType } = response.data;
+
+        // 로그인 정보 저장
+        login({ nickname, userType });
+
         // 홈 페이지로 이동
         router.push("/");
       }
     } catch (err) {
-      // 에러 처리
-      const axiosError = err as AxiosError<ApiErrorResponse>;
-      if (axiosError.response) {
-        const { statusCode } = axiosError.response.data;
+      // Zod 검증 에러 처리
+      if (err && typeof err === "object" && "issues" in err) {
+        const zodError = err as { issues: Array<{ path: string[]; message: string }> };
+        const fieldErrors: Record<string, string> = {};
 
-        // statusCode를 기반으로 에러 메시지 매핑
-        setError(ERROR_MESSAGES[statusCode] || "로그인에 실패했습니다. 다시 시도해주세요.");
+        zodError.issues.forEach((issue) => {
+          const fieldName = issue.path[0] as string;
+          if (!fieldErrors[fieldName]) {
+            fieldErrors[fieldName] = issue.message;
+          }
+        });
+
+        setErrors(fieldErrors);
       } else {
-        setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
+        // API 에러 처리: 백엔드에서 전송한 에러 메시지 (보안상 통합 메시지)
+        const errorMessage = getErrorMessage(err);
+        setErrors({ general: errorMessage });
       }
     } finally {
       setIsLoading(false);
@@ -130,31 +140,47 @@ export function LoginForm() {
           className="flex flex-col gap-4 px-6 pt-10"
         >
           {/* Email Input */}
-          <input
-            name="email"
-            type="email"
-            placeholder="이메일 입력"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
-            required
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              name="email"
+              type="text"
+              placeholder="이메일 입력"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
+                errors.email ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-gray-300"
+              }`}
+              disabled={isLoading}
+            />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+            )}
+          </div>
 
           {/* Password Input */}
-          <input
-            name="password"
-            type="password"
-            placeholder="패스워드 입력"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[13px] bg-white transition-colors"
-            required
-            disabled={isLoading}
-          />
+          <div>
+            <input
+              name="password"
+              type="password"
+              placeholder="패스워드 입력"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[13px] bg-white transition-colors ${
+                errors.password ? "border-red-500 focus:border-red-500" : "border-gray-200 focus:border-gray-300"
+              }`}
+              disabled={isLoading}
+            />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.password}</p>
+            )}
+          </div>
 
-          {/* Error Message */}
-          {error && <div className="text-red-500 text-sm px-1">{error}</div>}
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="text-red-500 text-sm px-3 py-2 bg-red-50 rounded border border-red-200">
+              {errors.general}
+            </div>
+          )}
 
           {/* Login Button */}
           <button

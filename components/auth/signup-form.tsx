@@ -5,37 +5,32 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { authService } from '@/services/auth.service';
-import type { ApiErrorResponse } from '@/lib/api/types';
-import { AxiosError } from 'axios';
+import { getErrorMessage } from '@/lib/api/error-handler';
 import { partsData, type Part } from '@/lib/data/teams';
 import { z } from 'zod';
 
-// Zod 스키마 정의
+// Zod 스키마 정의 (회원가입용 - 프로젝트 특화)
 const signupSchema = z.object({
-  nickname: z.string().min(1, '닉네임을 입력해주세요.'),
+  nickname: z.string()
+    .min(1, '닉네임을 입력해주세요.')
+    .min(2, '닉네임은 최소 2자 이상이어야 합니다.')
+    .max(8, '닉네임은 최대 8자까지 가능합니다.'),
   birthDate: z.string()
+    .min(1, '생년월일을 입력해주세요.')
     .regex(/^\d{8}$/, '생년월일은 8자리 숫자로 입력해주세요. (예: 19980101)'),
-  email: z.string().email('올바른 이메일 형식을 입력해주세요.'),
+  email: z.string()
+    .min(1, '이메일을 입력해주세요.')
+    .email('올바른 이메일 형식을 입력해주세요.'),
   password: z.string()
-    .min(8, '비밀번호는 8자리 이상이어야 합니다.')
-    .regex(/^(?=.*[A-Za-z])(?=.*\d)/, '비밀번호는 영문과 숫자를 포함해야 합니다.'),
-  passwordConfirm: z.string(),
+    .min(1, '비밀번호를 입력해주세요.')
+    .min(8, '비밀번호는 최소 8자 이상이어야 합니다.')
+    .max(14, '비밀번호는 최대 14자까지 가능합니다.')
+    .regex(/^(?=.*[a-zA-Z])(?=.*\d)[A-Za-z\d]+$/, '비밀번호는 영문과 숫자 조합이어야 합니다.'),
+  passwordConfirm: z.string().min(1, '비밀번호 확인을 입력해주세요.'),
 }).refine((data) => data.password === data.passwordConfirm, {
   message: '비밀번호가 일치하지 않습니다.',
   path: ['passwordConfirm'],
 });
-
-// 에러 메시지 매핑
-const ERROR_MESSAGES: Record<number, string> = {
-  1001: '닉네임 형식이 올바르지 않습니다.',
-  1002: '이미 사용 중인 닉네임입니다.',
-  1003: '비밀번호 형식이 올바르지 않습니다.',
-  1004: '생년월일 형식이 올바르지 않습니다.',
-  1005: '이메일 형식이 올바르지 않습니다.',
-  1006: '이미 가입된 이메일입니다.',
-  1007: '필수 약관 및 개인정보 처리에 동의해야 합니다.',
-  1008: '비밀번호가 일치하지 않습니다.',
-};
 
 type UserType = 'customer' | 'expert';
 
@@ -53,7 +48,7 @@ export function SignUpForm() {
     passwordConfirm: '',
   });
   const [agreed, setAgreed] = useState(false);
-  const [error, setError] = useState<string>('');
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
   const selectedPartData = partsData.find((p) => p.id === selectedPart);
@@ -62,8 +57,22 @@ export function SignUpForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    // 입력 시 에러 메시지 초기화
-    if (error) setError('');
+    // 입력 시 해당 필드의 에러 메시지 초기화
+    if (errors[name]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[name];
+        return newErrors;
+      });
+    }
+    // 일반 에러도 초기화
+    if (errors.general) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
   };
 
   const formatBirthDate = (date: string): string => {
@@ -76,37 +85,33 @@ export function SignUpForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setErrors({});
 
     // 약관 동의 확인
     if (!agreed) {
-      setError('필수 약관 및 개인정보 처리에 동의해야 합니다.');
+      setErrors({ general: '필수 약관 및 개인정보 처리에 동의해야 합니다.' });
       return;
     }
 
     // 팀/멤버 선택 확인
     if (!selectedPart || !selectedTeamId || !selectedMemberId) {
-      setError('파트, 팀, 이름을 모두 선택해주세요.');
-      return;
-    }
-
-    // Zod 클라이언트 검증
-    const validationResult = signupSchema.safeParse(formData);
-    if (!validationResult.success) {
-      const firstError = validationResult.error.issues[0];
-      setError(firstError.message);
+      setErrors({ general: '파트, 팀, 이름을 모두 선택해주세요.' });
       return;
     }
 
     setIsLoading(true);
 
     try {
+      // 1차 검증: Zod 스키마로 클라이언트 측 검증
+      const validatedData = signupSchema.parse(formData);
+
+      // 검증 통과 후 API 호출
       const response = await authService.signup({
-        nickname: formData.nickname,
-        birth: formatBirthDate(formData.birthDate),
-        email: formData.email,
-        password: formData.password,
-        passwordConfirm: formData.passwordConfirm,
+        nickname: validatedData.nickname,
+        birth: formatBirthDate(validatedData.birthDate),
+        email: validatedData.email,
+        password: validatedData.password,
+        passwordConfirm: validatedData.passwordConfirm,
         userType: userType === 'customer' ? 'GROOMER' : 'EXPERT',
         agreeTerms: agreed,
         agreePrivacy: agreed,
@@ -119,15 +124,23 @@ export function SignUpForm() {
         router.push('/auth/interest-selection');
       }
     } catch (err) {
-      // 에러 처리
-      const axiosError = err as AxiosError<ApiErrorResponse>;
-      if (axiosError.response) {
-        const { statusCode } = axiosError.response.data;
+      // Zod 검증 에러 처리
+      if (err && typeof err === 'object' && 'issues' in err) {
+        const zodError = err as { issues: Array<{ path: string[]; message: string }> };
+        const fieldErrors: Record<string, string> = {};
 
-        // statusCode를 기반으로 에러 메시지 매핑
-        setError(ERROR_MESSAGES[statusCode] || '회원가입에 실패했습니다. 다시 시도해주세요.');
+        zodError.issues.forEach((issue) => {
+          const fieldName = issue.path[0] as string;
+          if (!fieldErrors[fieldName]) {
+            fieldErrors[fieldName] = issue.message;
+          }
+        });
+
+        setErrors(fieldErrors);
       } else {
-        setError('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
+        // API 에러 처리: 백엔드에서 전송한 에러 메시지
+        const errorMessage = getErrorMessage(err);
+        setErrors({ general: errorMessage });
       }
     } finally {
       setIsLoading(false);
@@ -253,8 +266,13 @@ export function SignUpForm() {
               placeholder="이름을 입력해주세요."
               value={formData.nickname}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.nickname ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.nickname && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.nickname}</p>
+            )}
           </div>
 
           {/* 생년월일 */}
@@ -265,8 +283,13 @@ export function SignUpForm() {
               placeholder="ex) 19980101"
               value={formData.birthDate}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.birthDate && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.birthDate}</p>
+            )}
           </div>
 
           {/* 이메일 */}
@@ -274,12 +297,17 @@ export function SignUpForm() {
             <label className="block text-base font-medium text-black mb-3">이메일</label>
             <input
               name="email"
-              type="email"
+              type="text"
               placeholder="example@gmail.com"
               value={formData.email}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.email ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.email && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.email}</p>
+            )}
           </div>
 
           {/* 비밀번호 */}
@@ -288,11 +316,16 @@ export function SignUpForm() {
             <input
               name="password"
               type="password"
-              placeholder="영문+숫자 조합 8자리 이상 입력해주세요."
+              placeholder="8-14자 영문+숫자 조합 입력해주세요."
               value={formData.password}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.password ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
             />
+            {errors.password && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.password}</p>
+            )}
           </div>
 
           {/* 비밀번호 재확인 */}
@@ -304,15 +337,20 @@ export function SignUpForm() {
               placeholder="비밀번호를 한 번 더 입력해주세요."
               value={formData.passwordConfirm}
               onChange={handleChange}
-              className="w-full h-12 px-5 border border-gray-200 rounded focus:outline-none focus:border-gray-300 placeholder:text-gray-400 text-[12px] bg-white"
+              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
+                errors.passwordConfirm ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
+              }`}
               disabled={isLoading}
             />
+            {errors.passwordConfirm && (
+              <p className="text-red-500 text-xs mt-1 px-1">{errors.passwordConfirm}</p>
+            )}
           </div>
 
-          {/* Error Message */}
-          {error && (
-            <div className="text-red-500 text-sm px-1">
-              {error}
+          {/* General Error Message */}
+          {errors.general && (
+            <div className="text-red-500 text-sm px-3 py-2 bg-red-50 rounded border border-red-200">
+              {errors.general}
             </div>
           )}
         </form>

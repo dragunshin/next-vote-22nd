@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { AxiosError, AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // API Base URL - 환경 변수로 관리
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:3000/api';
@@ -24,6 +25,11 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // 클라이언트 사이드에서만 실행
       if (typeof window !== 'undefined') {
+        // Zustand에서 로그아웃 처리 (localStorage 정리)
+        const { logout } = useAuthStore.getState();
+        logout();
+
+        // 로그인 페이지로 리다이렉트
         window.location.href = '/auth/login';
       }
     }
