@@ -72,10 +72,17 @@ export default function Home() {
 
         {showMenu && (
           <div className="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10">
+            <Link
+              href="/candidates"
+              className="block px-6 py-3 hover:bg-gray-50 text-base"
+              onClick={() => setShowMenu(false)}
+            >
+              후보자 보기
+            </Link>
             {isAuthenticated ? (
               <button
                 onClick={handleLogout}
-                className="block w-full text-left px-6 py-3 hover:bg-gray-50 text-base"
+                className="block w-full text-left px-6 py-3 hover:bg-gray-50 text-base border-t border-gray-200"
               >
                 로그아웃
               </button>
@@ -83,7 +90,7 @@ export default function Home() {
               <>
                 <Link
                   href="/auth/login"
-                  className="block px-6 py-3 hover:bg-gray-50 text-base"
+                  className="block px-6 py-3 hover:bg-gray-50 text-base border-t border-gray-200"
                   onClick={() => setShowMenu(false)}
                 >
                   로그인
