@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAuthStore } from "@/stores/useAuthStore";
+import { authService } from "@/services/auth.service";
 
 type VoteCategory = "frontend" | "backend" | "demo";
 
@@ -17,11 +19,31 @@ export default function Home() {
   const [showMenu, setShowMenu] = useState(false);
   const [totalVotes] = useState(0);
 
-  // 실제 로그인 상태 체크
-  const [isLoggedIn] = useState(false);
+  // Zustand에서 로그인 상태와 사용자 정보 가져오기
+  const { isAuthenticated, user, initializeAuth, logout } = useAuthStore();
+
+  // 페이지 로드 시 localStorage에서 사용자 정보 복원
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
+
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+      logout();
+      setShowMenu(false);
+      router.push("/");
+    } catch (error) {
+      console.error("로그아웃 실패:", error);
+      // 실패해도 로컬 상태는 정리
+      logout();
+      setShowMenu(false);
+    }
+  };
 
   const handleVoteClick = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       router.push("/auth/login");
     } else {
       console.log("투표 페이지로 이동");
@@ -29,7 +51,7 @@ export default function Home() {
   };
 
   const handleVoteClick2 = () => {
-    if (!isLoggedIn) {
+    if (!isAuthenticated) {
       router.push("/vote");
     } else {
       console.log("투표 페이지로 이동");
@@ -38,27 +60,43 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
-      <header className="relative px-6 py-4 flex justify-end">
+      <header className="relative px-6 py-4 flex justify-between items-center">
+        <div className="text-sm text-gray-600">
+          {isAuthenticated && user && (
+            <span>{user.nickname}님 환영합니다</span>
+          )}
+        </div>
         <button onClick={() => setShowMenu(!showMenu)} className="text-2xl">
           ☰
         </button>
 
         {showMenu && (
           <div className="absolute top-16 right-6 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-10">
-            <Link
-              href="/auth/login"
-              className="block px-6 py-3 hover:bg-gray-50 text-base"
-              onClick={() => setShowMenu(false)}
-            >
-              로그인
-            </Link>
-            <Link
-              href="/auth/signup"
-              className="block px-6 py-3 hover:bg-gray-50 text-base border-t border-gray-200"
-              onClick={() => setShowMenu(false)}
-            >
-              회원가입
-            </Link>
+            {isAuthenticated ? (
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-6 py-3 hover:bg-gray-50 text-base"
+              >
+                로그아웃
+              </button>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="block px-6 py-3 hover:bg-gray-50 text-base"
+                  onClick={() => setShowMenu(false)}
+                >
+                  로그인
+                </Link>
+                <Link
+                  href="/auth/signup"
+                  className="block px-6 py-3 hover:bg-gray-50 text-base border-t border-gray-200"
+                  onClick={() => setShowMenu(false)}
+                >
+                  회원가입
+                </Link>
+              </>
+            )}
           </div>
         )}
       </header>

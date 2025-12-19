@@ -191,71 +191,14 @@ export function LoginForm() {
             {isLoading ? "로그인 중..." : "로그인"}
           </button>
 
-          {/* Password Reset / Sign Up Links */}
-          <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-            <button
-              type="button"
-              className="hover:text-black transition-colors"
-            >
-              비밀번호 찾기
-            </button>
-            <Image
-              src="/images/login/seperate.svg"
-              alt="separator"
-              width={1}
-              height={12}
-            />
+          {/* Sign Up Link */}
+          <div className="flex items-center justify-center gap-2 text-sm text-gray-600 pb-8">
             <Link
               href="/auth/signup"
               className="hover:text-black transition-colors"
             >
               이메일로 회원가입
             </Link>
-          </div>
-
-          {/* Divider */}
-          <div className="flex items-center gap-4 pt-[78px] pb-5">
-            <div className="flex-1 border-t border-gray-200" />
-            <span className="text-sm text-gray-500">
-              SNS 계정으로 간편로그인
-            </span>
-            <div className="flex-1 border-t border-gray-200" />
-          </div>
-
-          {/* Social Login Buttons */}
-          <div className="flex flex-col gap-3 pb-8">
-            <button
-              type="button"
-              className="w-full h-14 flex items-center justify-center gap-3 border border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded"
-            >
-              <Image
-                src="/images/login/google.svg"
-                alt="Google"
-                width={20}
-                height={20}
-              />
-              <span className="text-base font-medium text-gray-900">
-                Google 로그인
-              </span>
-            </button>
-            <button
-              type="button"
-              className="w-full h-14 flex items-center justify-center gap-3 hover:opacity-90 transition-opacity rounded"
-              style={{ backgroundColor: "#FEE500" }}
-            >
-              <Image
-                src="/images/login/kakao.svg"
-                alt="Kakao"
-                width={20}
-                height={20}
-              />
-              <span
-                className="text-base font-semibold"
-                style={{ color: "#3C1E1E" }}
-              >
-                카카오톡 로그인
-              </span>
-            </button>
           </div>
         </form>
       </div>

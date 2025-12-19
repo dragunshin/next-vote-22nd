@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
 import { authService } from '@/services/auth.service';
 import { getErrorMessage } from '@/lib/api/error-handler';
 import { partsData, type Part } from '@/lib/data/teams';
@@ -15,9 +14,6 @@ const signupSchema = z.object({
     .min(1, '닉네임을 입력해주세요.')
     .min(2, '닉네임은 최소 2자 이상이어야 합니다.')
     .max(8, '닉네임은 최대 8자까지 가능합니다.'),
-  birthDate: z.string()
-    .min(1, '생년월일을 입력해주세요.')
-    .regex(/^\d{8}$/, '생년월일은 8자리 숫자로 입력해주세요. (예: 19980101)'),
   email: z.string()
     .min(1, '이메일을 입력해주세요.')
     .email('올바른 이메일 형식을 입력해주세요.'),
@@ -32,22 +28,17 @@ const signupSchema = z.object({
   path: ['passwordConfirm'],
 });
 
-type UserType = 'customer' | 'expert';
-
 export function SignUpForm() {
   const router = useRouter();
-  const [userType, setUserType] = useState<UserType>('customer');
   const [selectedPart, setSelectedPart] = useState<Part | null>(null);
   const [selectedTeamId, setSelectedTeamId] = useState<string>('');
   const [selectedMemberId, setSelectedMemberId] = useState<string>('');
   const [formData, setFormData] = useState({
     nickname: '',
-    birthDate: '',
     email: '',
     password: '',
     passwordConfirm: '',
   });
-  const [agreed, setAgreed] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -75,23 +66,9 @@ export function SignUpForm() {
     }
   };
 
-  const formatBirthDate = (date: string): string => {
-    // YYYYMMDD -> YYYY-MM-DD 변환
-    if (date.length === 8) {
-      return `${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)}`;
-    }
-    return date;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
-
-    // 약관 동의 확인
-    if (!agreed) {
-      setErrors({ general: '필수 약관 및 개인정보 처리에 동의해야 합니다.' });
-      return;
-    }
 
     // 팀/멤버 선택 확인
     if (!selectedPart || !selectedTeamId || !selectedMemberId) {
@@ -105,23 +82,27 @@ export function SignUpForm() {
       // 1차 검증: Zod 스키마로 클라이언트 측 검증
       const validatedData = signupSchema.parse(formData);
 
-      // 검증 통과 후 API 호출
-      const response = await authService.signup({
-        nickname: validatedData.nickname,
-        birth: formatBirthDate(validatedData.birthDate),
+      // 선택한 팀 정보 가져오기
+      const selectedTeamData = selectedPartData?.teams.find((t) => t.id === selectedTeamId);
+
+      // 검증 통과 후 API 호출 - 백엔드 요구 형식에 맞춤
+      const requestData = {
+        username: validatedData.nickname,
         email: validatedData.email,
         password: validatedData.password,
         passwordConfirm: validatedData.passwordConfirm,
-        userType: userType === 'customer' ? 'GROOMER' : 'EXPERT',
-        agreeTerms: agreed,
-        agreePrivacy: agreed,
-      });
+        team: selectedTeamData?.name || '',
+        part: selectedPart === 'frontend' ? 'FRONTEND' : 'BACKEND',
+      };
+
+      console.log('회원가입 요청 데이터:', requestData);
+      const response = await authService.signup(requestData);
 
       // 회원가입 성공
       if (response.statusCode === 0) {
         console.log('회원가입 성공:', response.data);
-        // 관심 분야 선택 페이지로 이동
-        router.push('/auth/interest-selection');
+        // 홈화면으로 이동
+        router.push('/');
       }
     } catch (err) {
       // Zod 검증 에러 처리
@@ -149,14 +130,12 @@ export function SignUpForm() {
 
   const isFormValid =
     formData.nickname &&
-    formData.birthDate &&
     formData.email &&
     formData.password &&
     formData.passwordConfirm &&
     selectedPart &&
     selectedTeamId &&
-    selectedMemberId &&
-    agreed;
+    selectedMemberId;
 
   return (
     <div className="min-h-screen bg-white flex flex-col">
@@ -275,23 +254,6 @@ export function SignUpForm() {
             )}
           </div>
 
-          {/* 생년월일 */}
-          <div>
-            <label className="block text-base font-medium text-black mb-3">생년월일</label>
-            <input
-              name="birthDate"
-              placeholder="ex) 19980101"
-              value={formData.birthDate}
-              onChange={handleChange}
-              className={`w-full h-12 px-5 border rounded focus:outline-none placeholder:text-gray-400 text-[12px] bg-white ${
-                errors.birthDate ? 'border-red-500 focus:border-red-500' : 'border-gray-200 focus:border-gray-300'
-              }`}
-            />
-            {errors.birthDate && (
-              <p className="text-red-500 text-xs mt-1 px-1">{errors.birthDate}</p>
-            )}
-          </div>
-
           {/* 이메일 */}
           <div>
             <label className="block text-base font-medium text-black mb-3">이메일</label>
@@ -353,45 +315,17 @@ export function SignUpForm() {
               {errors.general}
             </div>
           )}
-        </form>
-      </div>
 
-      {/* 약관 동의 - 하단 고정 */}
-      <div className="px-6 py-6">
-        <label className="flex items-center gap-3 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={agreed}
-            onChange={(e) => setAgreed(e.target.checked)}
-            className="w-5 h-5 rounded border-gray-300"
-          />
-          <span className="text-[12px] text-gray-600">
-            <Link
-              href="/auth/terms-of-service"
-              className="underline text-black hover:font-bold"
-            >
-              이용약관
-            </Link>
-            {' '}및{' '}
-            <Link
-              href="/auth/privacy-policy"
-              className="underline text-black hover:font-bold"
-            >
-              개인정보 취급방침
-            </Link>
-            에 동의합니다. (필수)
-          </span>
-        </label>
-      </div>
-      {/* Submit Button - 하단 고정 */}
-      <div className="mt-auto">
-        <button
-          type="submit"
-          disabled={isLoading || !isFormValid}
-          className="w-full h-14 font-medium transition-colors bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isLoading ? '처리 중...' : '다음'}
-        </button>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={isLoading || !isFormValid}
+            className="w-full h-14 font-medium transition-colors bg-black text-white disabled:opacity-50 disabled:cursor-not-allowed mb-6"
+          >
+            {isLoading ? '처리 중...' : '다음'}
+          </button>
+        </form>
       </div>
     </div>
   );

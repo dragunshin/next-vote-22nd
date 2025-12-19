@@ -24,7 +24,7 @@ export const partsData: PartData[] = [
     teams: [
       {
         id: 'fe-team-1',
-        name: 'DiggIndie',
+        name: 'DIGGINDIE',
         members: [
           { id: 'fe1-member-1', name: '백승선' },
           { id: 'fe1-member-2', name: '조성아' },
@@ -32,7 +32,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'fe-team-2',
-        name: '모델리',
+        name: 'MODELLY',
         members: [
           { id: 'fe2-member-1', name: '손주완' },
           { id: 'fe2-member-2', name: '정윤지' },
@@ -40,7 +40,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'fe-team-3',
-        name: '캐치업',
+        name: 'CATCHUP',
         members: [
           { id: 'fe3-member-1', name: '정성훈' },
           { id: 'fe3-member-2', name: '장자윤' },
@@ -48,7 +48,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'fe-team-4',
-        name: 'menual',
+        name: 'MENUAL',
         members: [
           { id: 'fe4-member-1', name: '신용섭' },
           { id: 'fe4-member-2', name: '최무헌' },
@@ -70,7 +70,7 @@ export const partsData: PartData[] = [
     teams: [
       {
         id: 'be-team-1',
-        name: 'Digglndie',
+        name: 'DIGGINDIE',
         members: [
           { id: 'be1-member-1', name: '변호영' },
           { id: 'be1-member-2', name: '이윤지' },
@@ -78,7 +78,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'be-team-2',
-        name: '모델리',
+        name: 'MODELLY',
         members: [
           { id: 'be2-member-1', name: '이연호' },
           { id: 'be2-member-2', name: '이준영' },
@@ -86,7 +86,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'be-team-3',
-        name: '캐치업',
+        name: 'CATCHUP',
         members: [
           { id: 'be3-member-1', name: '배승식' },
           { id: 'be3-member-2', name: '신혁' },
@@ -94,7 +94,7 @@ export const partsData: PartData[] = [
       },
       {
         id: 'be-team-4',
-        name: 'menual',
+        name: 'MENUAL',
         members: [
           { id: 'be4-member-1', name: '이지원' },
           { id: 'be4-member-2', name: '변하영' },

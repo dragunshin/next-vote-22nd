@@ -12,28 +12,30 @@ export interface LoginRequest {
 }
 
 export interface LoginResponse {
-  nickname: string;
-  userType: 'GROOMER' | 'EXPERT';
+  userId: number;
+  username: string;
+  email: string;
+  team: string;
+  part: string;
 }
 
 // 회원가입 API
 export interface SignupRequest {
-  nickname: string;
-  birth: string; // YYYY-MM-DD
+  username: string;
   email: string;
   password: string;
   passwordConfirm: string;
-  userType: string;
-  agreeTerms: boolean;
-  agreePrivacy: boolean;
+  team: string;
+  part: string;
 }
 
 export interface SignupResponse {
   userId: number;
+  username: string;
+  team: string;
+  part: string;
   email: string;
-  nickname: string;
   createdAt: string;
-  userType: string;
 }
 
 // 소셜 로그인 API
