@@ -60,10 +60,10 @@ export function LoginForm() {
 
       // 로그인 성공
       if (response.statusCode === 0) {
-        const { nickname, userType } = response.data;
+        const { userId, username, email, team, part } = response.data;
 
         // 로그인 정보 저장
-        login({ nickname, userType });
+        login({ userId, username, email, team, part });
 
         // 홈 페이지로 이동
         router.push("/");

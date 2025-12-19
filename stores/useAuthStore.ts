@@ -2,8 +2,11 @@ import { create } from 'zustand';
 
 // 사용자 정보 타입
 export interface User {
-  nickname: string;
-  userType: 'GROOMER' | 'EXPERT';
+  userId: number;
+  username: string;
+  email: string;
+  team: string;
+  part: string;
 }
 
 // Auth Store 상태 타입

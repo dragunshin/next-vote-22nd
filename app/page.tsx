@@ -63,7 +63,7 @@ export default function Home() {
       <header className="relative px-6 py-4 flex justify-between items-center">
         <div className="text-sm text-gray-600">
           {isAuthenticated && user && (
-            <span>{user.nickname}님 환영합니다</span>
+            <span>{user.username}님 환영합니다</span>
           )}
         </div>
         <button onClick={() => setShowMenu(!showMenu)} className="text-2xl">
