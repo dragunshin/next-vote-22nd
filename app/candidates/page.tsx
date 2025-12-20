@@ -39,8 +39,8 @@ export default function CandidatesPage() {
           onClick={() => setSelectedPart("FRONTEND")}
           className={`flex-1 py-3 text-base font-semibold rounded-full transition-all ${
             selectedPart === "FRONTEND"
-              ? "bg-[#5FD17A] text-white"
-              : "bg-white text-[#5FD17A] border-2 border-[#5FD17A]"
+              ? "bg-black text-white"
+              : "bg-white text-gray-700 border-2 border-gray-300"
           }`}
         >
           Front-End
@@ -49,8 +49,8 @@ export default function CandidatesPage() {
           onClick={() => setSelectedPart("BACKEND")}
           className={`flex-1 py-3 text-base font-semibold rounded-full transition-all ${
             selectedPart === "BACKEND"
-              ? "bg-[#5FD17A] text-white"
-              : "bg-white text-[#5FD17A] border-2 border-[#5FD17A]"
+              ? "bg-black text-white"
+              : "bg-white text-gray-700 border-2 border-gray-300"
           }`}
         >
           Back-End
@@ -83,7 +83,7 @@ function CandidateCard({
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white border-2 border-[#5FD17A] rounded-2xl p-4 hover:shadow-md transition-shadow"
+      className="w-full bg-white border-2 border-gray-200 rounded-2xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
     >
       <div className="flex flex-col items-center gap-2">
         {/* 후보자 이미지 */}

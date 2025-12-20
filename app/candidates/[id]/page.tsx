@@ -42,7 +42,7 @@ export default function CandidateDetailPage() {
       {/* 후보자들 */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {/* 후보자 이미지 */}
-        <div className="w-full aspect-square max-w-md mx-auto mb-6 rounded-lg overflow-hidden flex items-center justify-center">
+        <div className="w-full aspect-square max-w-md mx-auto mb-6 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-gray-200">
           <Image
             src={candidate.image}
             alt={candidate.name}
@@ -59,20 +59,20 @@ export default function CandidateDetailPage() {
         {/* 후보자 기본 정보 */}
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
-            <h2 className="text-2xl font-bold">{candidate.name}</h2>
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm text-gray-600">
+            <h2 className="text-2xl font-bold text-gray-900">{candidate.name}</h2>
+            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700">
               {candidate.team}
             </span>
           </div>
-          <p className="text-gray-600">
+          <p className="text-gray-600 font-medium">
             {candidate.part === "FRONTEND" ? "Front-End" : "Back-End"} 파트
           </p>
         </div>
 
         {/* 소개 */}
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3">후보자 소개</h3>
-          <div className="bg-gray-50 rounded-lg p-4">
+        <div className="mb-8">
+          <h3 className="text-lg font-semibold mb-3 text-gray-900">후보자 소개</h3>
+          <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {candidate.introduction}
             </p>
@@ -81,7 +81,11 @@ export default function CandidateDetailPage() {
 
         {/* 투표하기 버튼 */}
         <button
-          onClick={() => router.push("/vote")}
+          onClick={() => {
+            const votePath =
+              candidate.part === "FRONTEND" ? "/vote/front" : "/vote/back";
+            router.push(votePath);
+          }}
           className="w-full h-14 bg-black text-white font-semibold rounded hover:bg-gray-800 transition-colors"
         >
           투표하러 가기
