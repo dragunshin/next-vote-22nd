@@ -42,19 +42,26 @@ export default function Home() {
     }
   };
 
-  const handleVoteClick = () => {
-    if (!isAuthenticated) {
-      router.push("/auth/login");
-    } else {
-      console.log("투표 페이지로 이동");
-    }
-  };
+  // const handleVoteClick = () => {
+  //   if (!isAuthenticated) {
+  //     router.push("/auth/login");
+  //   } else {
+  //      router.push("/vote/front");
+  //   }
+  // };
 
   const handleVoteClick2 = () => {
     if (!isAuthenticated) {
-      router.push("/vote");
+      router.push("/auth/login");
     } else {
-      console.log("투표 페이지로 이동");
+      router.push("/vote/front");
+    }
+  };
+  const handleVoteClick3 = () => {
+    if (!isAuthenticated) {
+      router.push("/auth/login");
+    } else {
+      router.push("/vote/team");
     }
   };
 
@@ -62,9 +69,7 @@ export default function Home() {
     <div className="min-h-screen bg-white flex flex-col">
       <header className="relative px-6 py-4 flex justify-between items-center">
         <div className="text-sm text-gray-600">
-          {isAuthenticated && user && (
-            <span>{user.username}님 환영합니다</span>
-          )}
+          {isAuthenticated && user && <span>{user.username}님 환영합니다</span>}
         </div>
         <button onClick={() => setShowMenu(!showMenu)} className="text-2xl">
           ☰
@@ -130,7 +135,7 @@ export default function Home() {
         </div>
 
         <div className="mt-auto pb-8 text-center">
-          <button
+          {/* <button
             onClick={handleVoteClick}
             className="w-full max-w-[200px] mx-auto block px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
           >
@@ -139,13 +144,20 @@ export default function Home() {
           <p className="mt-4 text-sm text-[#7C3AED]">
             현재 총 <span className="font-bold">{totalVotes}건</span>의 투표가
             진행되었어요!
-          </p>
+          </p> */}
 
           <button
             onClick={handleVoteClick2}
+            className="w-full max-w-[200px] mx-auto block mb-4 px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
+          >
+            프론트 투표
+          </button>
+
+          <button
+            onClick={handleVoteClick3}
             className="w-full max-w-[200px] mx-auto block px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
           >
-            투표하러 가기(프론트)
+            데모데이 투표
           </button>
         </div>
       </div>
