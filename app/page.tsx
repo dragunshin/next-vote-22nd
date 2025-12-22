@@ -150,7 +150,7 @@ export default function Home() {
             onClick={handleVoteClick2}
             className="w-full max-w-[200px] mx-auto block mb-4 px-8 py-3 bg-white border-2 border-[#7C3AED] text-[#7C3AED] rounded-full text-base font-medium hover:bg-[#7C3AED] hover:text-white transition-colors"
           >
-            프론트 투표
+            파트장 투표
           </button>
 
           <button
