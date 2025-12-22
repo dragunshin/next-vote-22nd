@@ -42,7 +42,7 @@ export default function CandidateDetailPage() {
       {/* 후보자들 */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         {/* 후보자 이미지 */}
-        <div className="w-full aspect-square max-w-md mx-auto mb-6 rounded-2xl overflow-hidden flex items-center justify-center border-2 border-gray-200">
+        <div className="w-full aspect-square max-w-md mx-auto mb-6 rounded overflow-hidden flex items-center justify-center border-2 border-gray-200">
           <Image
             src={candidate.image}
             alt={candidate.name}
@@ -60,7 +60,7 @@ export default function CandidateDetailPage() {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <h2 className="text-2xl font-bold text-gray-900">{candidate.name}</h2>
-            <span className="px-3 py-1 bg-gray-100 rounded-full text-sm font-medium text-gray-700">
+            <span className="px-3 py-1 bg-gray-100 rounded text-sm font-medium text-gray-700">
               {candidate.team}
             </span>
           </div>
@@ -72,7 +72,7 @@ export default function CandidateDetailPage() {
         {/* 소개 */}
         <div className="mb-8">
           <h3 className="text-lg font-semibold mb-3 text-gray-900">후보자 소개</h3>
-          <div className="bg-gray-50 rounded-xl p-5 border border-gray-200">
+          <div className="bg-gray-50 rounded p-5 border border-gray-200">
             <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
               {candidate.introduction}
             </p>

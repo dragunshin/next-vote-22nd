@@ -37,7 +37,7 @@ export default function CandidatesPage() {
       <div className="flex gap-4 px-6 py-4">
         <button
           onClick={() => setSelectedPart("FRONTEND")}
-          className={`flex-1 py-3 text-base font-semibold rounded-full transition-all ${
+          className={`flex-1 py-3 text-base font-semibold rounded transition-all ${
             selectedPart === "FRONTEND"
               ? "bg-black text-white"
               : "bg-white text-gray-700 border-2 border-gray-300"
@@ -47,7 +47,7 @@ export default function CandidatesPage() {
         </button>
         <button
           onClick={() => setSelectedPart("BACKEND")}
-          className={`flex-1 py-3 text-base font-semibold rounded-full transition-all ${
+          className={`flex-1 py-3 text-base font-semibold rounded transition-all ${
             selectedPart === "BACKEND"
               ? "bg-black text-white"
               : "bg-white text-gray-700 border-2 border-gray-300"
@@ -83,7 +83,7 @@ function CandidateCard({
   return (
     <button
       onClick={onClick}
-      className="w-full bg-white border-2 border-gray-200 rounded-2xl p-4 hover:shadow-md hover:border-gray-300 transition-all"
+      className="w-full bg-white border-2 border-gray-200 rounded p-4 hover:shadow-md hover:border-gray-300 transition-all"
     >
       <div className="flex flex-col items-center gap-2">
         {/* 후보자 이미지 */}
